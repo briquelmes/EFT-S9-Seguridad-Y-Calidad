@@ -1,0 +1,8 @@
+#Utiliza la imagen oficial de MySQL compatible con ARM64
+FROM mysql/mysql-server:latest
+
+#Define environment variables
+ENV MYSQL_ROOT_PASSWORD=password
+ENV MYSQL_DATABASE=mydatabase
+ENV MYSQL_USER=myuser
+ENV MYSQL_PASSWORD=password
