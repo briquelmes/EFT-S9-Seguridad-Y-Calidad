@@ -1,6 +1,5 @@
 package com.duoc.backend.medication;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -9,8 +8,11 @@ import java.util.List;
 @RequestMapping("/medication")
 public class MedicationController {
 
-    @Autowired
-    private MedicationService medicationService;
+    private final MedicationService medicationService;
+
+    public MedicationController(MedicationService medicationService) {
+        this.medicationService = medicationService;
+    }
 
     @GetMapping
     public List<Medication> getAllMedications() {

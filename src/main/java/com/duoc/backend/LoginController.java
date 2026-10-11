@@ -1,9 +1,8 @@
 package com.duoc.backend;
-import com.duoc.backend.JWTAuthenticationConfig;
+
 import com.duoc.backend.user.MyUserDetailsService;
 import com.duoc.backend.user.User;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,11 +12,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class LoginController {
 
-    @Autowired
-    JWTAuthenticationConfig jwtAuthtenticationConfig;
+    private final JWTAuthenticationConfig jwtAuthenticationConfig;
+    private final MyUserDetailsService userDetailsService;
 
-    @Autowired
-    private MyUserDetailsService userDetailsService;
+    public LoginController(JWTAuthenticationConfig jwtAuthenticationConfig, MyUserDetailsService userDetailsService) {
+        this.jwtAuthenticationConfig = jwtAuthenticationConfig;
+        this.userDetailsService = userDetailsService;
+    }
 
     @PostMapping("login")
     public String login(@RequestBody User loginRequest) {
@@ -32,7 +33,7 @@ public class LoginController {
             throw new RuntimeException("Invalid login");
         }
 
-        String token = jwtAuthtenticationConfig.getJWTToken(loginRequest.getUsername());
+        String token = jwtAuthenticationConfig.getJWTToken(loginRequest.getUsername());
         return token;
     }
 

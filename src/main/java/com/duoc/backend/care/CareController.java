@@ -1,6 +1,5 @@
 package com.duoc.backend.care;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -9,8 +8,11 @@ import java.util.List;
 @RequestMapping("/care")
 public class CareController {
 
-    @Autowired
-    private CareRepository careRepository;
+    private final CareRepository careRepository;
+
+    public CareController(CareRepository careRepository) {
+        this.careRepository = careRepository;
+    }
 
     @GetMapping
     public List<Care> getAllCares() {

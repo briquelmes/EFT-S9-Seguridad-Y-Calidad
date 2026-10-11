@@ -12,7 +12,7 @@ class ReflectedXssEscapingTest {
 
     @Test
     void patientRegisterEscapesHtmlInName() {
-        PatientController controller = new PatientController();
+        PatientController controller = new PatientController(null);
 
         assertEquals("Hello {" + ESCAPED_PAYLOAD + "}", controller.greetings(XSS_PAYLOAD));
     }
