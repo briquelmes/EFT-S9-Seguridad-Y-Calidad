@@ -8,6 +8,7 @@ import com.duoc.backend.medication.MedicationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -32,28 +33,28 @@ public class InvoiceService {
         return invoiceRepository.findById(id).orElse(null);
     }
 
-    public Invoice saveInvoice(Invoice invoice) {
-        // Validar que los medicamentos existen
+    public Invoice saveInvoice(InvoiceRequest request) {
+        List<Long> medicationIds = request.medicationIds() == null ? List.of() : request.medicationIds();
+        List<Long> careIds = request.careIds() == null ? List.of() : request.careIds();
+
         List<Medication> validMedications = StreamSupport.stream(
                 medicationRepository.findAllById(
-                        invoice.getMedications().stream().map(Medication::getId).collect(Collectors.toList())
+                        medicationIds
                 ).spliterator(), false
         ).collect(Collectors.toList());
-        if (validMedications.size() != invoice.getMedications().size()) {
+        if (validMedications.size() != medicationIds.size()) {
             throw new IllegalArgumentException("Algunos medicamentos no existen en la base de datos.");
         }
 
-        // Validar que los servicios existen
         List<Care> validCares = StreamSupport.stream(
                 careRepository.findAllById(
-                        invoice.getCares().stream().map(Care::getId).collect(Collectors.toList())
+                        careIds
                 ).spliterator(), false
         ).collect(Collectors.toList());
-        if (validCares.size() != invoice.getCares().size()) {
+        if (validCares.size() != careIds.size()) {
             throw new IllegalArgumentException("Algunos servicios no existen en la base de datos.");
         }
 
-        // Calcular el costo total basado en los servicios y medicamentos asociados
         double totalCareCost = validCares.stream()
                 .mapToDouble(Care::getCost)
                 .sum();
@@ -62,9 +63,15 @@ public class InvoiceService {
                 .mapToDouble(Medication::getCost)
                 .sum();
 
+        Invoice invoice = new Invoice(
+                null,
+                request.patientName(),
+                request.date(),
+                new ArrayList<>(validCares),
+                new ArrayList<>(validMedications));
+        invoice.setTime(request.time());
         invoice.setTotalCost(totalCareCost + totalMedicationCost);
 
-        // Guardar la factura en el repositorio
         return invoiceRepository.save(invoice);
     }
 

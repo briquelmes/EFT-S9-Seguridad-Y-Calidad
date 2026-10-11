@@ -25,7 +25,8 @@ public class MedicationController {
     }
 
     @PostMapping
-    public Medication saveMedication(@RequestBody Medication medication) {
+    public Medication saveMedication(@RequestBody MedicationRequest request) {
+        Medication medication = new Medication(request.name(), request.cost());
         return medicationService.saveMedication(medication);
     }
 

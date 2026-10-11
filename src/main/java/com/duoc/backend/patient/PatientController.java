@@ -40,7 +40,13 @@ public class PatientController {
     }
 
     @PostMapping
-    public Patient savePatient(@RequestBody Patient patient) {
+    public Patient savePatient(@RequestBody PatientRequest request) {
+        Patient patient = new Patient();
+        patient.setName(request.name());
+        patient.setSpecies(request.species());
+        patient.setBreed(request.breed());
+        patient.setAge(request.age());
+        patient.setOwner(request.owner());
         return patientService.savePatient(patient);
     }
 
@@ -50,4 +56,3 @@ public class PatientController {
     }
     
 }
-

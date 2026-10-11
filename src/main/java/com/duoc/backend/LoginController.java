@@ -1,7 +1,7 @@
 package com.duoc.backend;
 
 import com.duoc.backend.user.MyUserDetailsService;
-import com.duoc.backend.user.User;
+import com.duoc.backend.user.LoginRequest;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,19 +21,19 @@ public class LoginController {
     }
 
     @PostMapping("login")
-    public String login(@RequestBody User loginRequest) {
+    public String login(@RequestBody LoginRequest loginRequest) {
 
         /**
         * En el ejemplo no se realiza la correcta validación del usuario
         */
 
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.username());
 
-        if (!userDetails.getPassword().equals(loginRequest.getPassword())) {
+        if (!userDetails.getPassword().equals(loginRequest.password())) {
             throw new RuntimeException("Invalid login");
         }
 
-        String token = jwtAuthenticationConfig.getJWTToken(loginRequest.getUsername());
+        String token = jwtAuthenticationConfig.getJWTToken(loginRequest.username());
         return token;
     }
 

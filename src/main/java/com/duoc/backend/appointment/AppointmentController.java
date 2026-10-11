@@ -25,7 +25,12 @@ public class AppointmentController {
     }
 
     @PostMapping
-    public Appointment saveAppointment(@RequestBody Appointment appointment) {
+    public Appointment saveAppointment(@RequestBody AppointmentRequest request) {
+        Appointment appointment = new Appointment();
+        appointment.setDate(request.date());
+        appointment.setTime(request.time());
+        appointment.setReason(request.reason());
+        appointment.setVeterinarian(request.veterinarian());
         return appointmentService.saveAppointment(appointment);
     }
 

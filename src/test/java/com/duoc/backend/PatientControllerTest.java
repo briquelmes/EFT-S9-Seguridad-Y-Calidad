@@ -7,10 +7,13 @@ import org.mockito.MockitoAnnotations;
 import com.duoc.backend.patient.PatientService;
 import com.duoc.backend.patient.PatientController;
 import com.duoc.backend.patient.Patient;
+import com.duoc.backend.patient.PatientRequest;
 
 import java.util.Arrays;
 import java.util.List;
+import org.mockito.ArgumentCaptor;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -90,14 +93,18 @@ class PatientControllerTest {
         patient.setAge(5);
         patient.setOwner("Juan Pérez");
 
-        when(patientService.savePatient(patient)).thenReturn(patient);
+        when(patientService.savePatient(any(Patient.class))).thenReturn(patient);
 
-        // Act
-        Patient result = patientController.savePatient(patient);
+        Patient result = patientController.savePatient(
+                new PatientRequest("Firulais", "Perro", "Labrador", 5, "Juan Pérez"));
 
         // Assert
         assertEquals("Firulais", result.getName());
-        verify(patientService, times(1)).savePatient(patient);
+        ArgumentCaptor<Patient> patientCaptor = ArgumentCaptor.forClass(Patient.class);
+        verify(patientService, times(1)).savePatient(patientCaptor.capture());
+        assertNull(patientCaptor.getValue().getId());
+        assertEquals("Firulais", patientCaptor.getValue().getName());
+        assertEquals("Juan Pérez", patientCaptor.getValue().getOwner());
     }
 
     @Test
