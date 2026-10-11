@@ -1,29 +1,25 @@
 package com.duoc.backend.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 
 
-
-@Configuration
 @Service
 public class MyUserDetailsService implements UserDetailsService {
 
-        Logger logger
-        = LoggerFactory.getLogger(MyUserDetailsService.class);
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private UserRepository userRepository;
-
+    public MyUserDetailsService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) {
@@ -34,8 +30,29 @@ public class MyUserDetailsService implements UserDetailsService {
         return user;
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
+    public boolean authenticate(String username, String rawPassword) {
+        if (rawPassword == null) {
+            return false;
+        }
+
+        User user = userRepository.findByUsername(username);
+        if (user == null || user.getPassword() == null) {
+            return false;
+        }
+
+        String storedPassword = user.getPassword();
+        if (passwordEncoder.matches(rawPassword, storedPassword)) {
+            return true;
+        }
+
+        if (MessageDigest.isEqual(
+                rawPassword.getBytes(StandardCharsets.UTF_8),
+                storedPassword.getBytes(StandardCharsets.UTF_8))) {
+            user.setPassword(passwordEncoder.encode(rawPassword));
+            userRepository.save(user);
+            return true;
+        }
+
+        return false;
     }
 }

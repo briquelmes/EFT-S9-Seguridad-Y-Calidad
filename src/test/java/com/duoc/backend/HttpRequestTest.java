@@ -8,13 +8,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureTestRestTemplate
 class HttpRequestTest {
 
     @LocalServerPort
@@ -26,6 +29,9 @@ class HttpRequestTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @BeforeEach
     void ensureTestUserExists() {
         User testUser = userRepository.findByUsername("prueba");
@@ -33,7 +39,7 @@ class HttpRequestTest {
             testUser = new User();
             testUser.setUsername("prueba");
         }
-        testUser.setPassword("123456");
+        testUser.setPassword(passwordEncoder.encode("123456"));
         testUser.setEmail("prueba@example.com");
         testUser.setEnabled(true);
         userRepository.save(testUser);
@@ -56,6 +62,7 @@ class HttpRequestTest {
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(MediaType.TEXT_PLAIN.isCompatibleWith(response.getHeaders().getContentType()));
         String token = Objects.requireNonNull(response.getBody(), "Login response body should not be null");
         assertTrue(token.startsWith("Bearer "));
     }

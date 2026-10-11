@@ -6,14 +6,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.http.*;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 
 
@@ -28,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 //@SpringJUnitConfig(PatientController.class)
 @AutoConfigureMockMvc // Configura MockMvc automáticamente
+@AutoConfigureTestRestTemplate
 class PatientControllerIntegrationTest {
 
     @LocalServerPort
@@ -45,6 +48,9 @@ class PatientControllerIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @BeforeEach
     void ensureTestUserExists() {
         User testUser = userRepository.findByUsername("prueba");
@@ -52,7 +58,7 @@ class PatientControllerIntegrationTest {
             testUser = new User();
             testUser.setUsername("prueba");
         }
-        testUser.setPassword("123456");
+        testUser.setPassword(passwordEncoder.encode("123456"));
         testUser.setEmail("prueba@example.com");
         testUser.setEnabled(true);
         userRepository.save(testUser);
